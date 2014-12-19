@@ -1,3 +1,6 @@
+package com.ddumanskiy.web.controllers;
+
+import com.ddumanskiy.web.enums.FinanceUABidType;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -5,32 +8,50 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Main {
+import static com.ddumanskiy.web.enums.FinanceUABidType.ASK;
+import static com.ddumanskiy.web.enums.FinanceUABidType.BID;
+
+/**
+ * Created by ddumanskiy
+ * Date : 12/19/2014.
+ *
+ * Grabs all 'bids' info from finance.ua.
+ */
+public class FinanceUAController {
+
+    private static final Logger log = LogManager.getLogger(FinanceUAController.class);
 
     private static final String BASE_URL = "http://tables.finance.ua/ua/currency/order";
     private static CloseableHttpClient httpclient = HttpClients.createDefault();
 
-    public static void main(String[] args) throws Exception {
-        double averageMin = average(Type.BID);
-        double averageMax = average(Type.ASK);
-        System.out.println("Average : " + averageMin + " - " + averageMax);
+    public Double getAverage() {
+        try {
+            double averageMin = average(BID);
+            double averageMax = average(ASK);
+            log.debug("Average : {} - {}", averageMin, averageMax);
+            return (averageMin + averageMax) / 2;
+        } catch (Exception e) {
+            log.error(e);
+        }
+        return null;
     }
 
-    public static double average(Type type) throws Exception {
+    public static double average(FinanceUABidType financeUABidType) throws Exception {
         HttpPost post = new HttpPost(BASE_URL);
 
         List<NameValuePair> nameValuePairs = new ArrayList<>();
         nameValuePairs.add(new BasicNameValuePair("xajax", "load"));
-        nameValuePairs.add(new BasicNameValuePair("xajaxargs[]", "<xjxobj><e><k>event</k><v>type</v></e><e><k>location</k><v>ua,0,8</v></e><e><k>currency</k><v>USD</v></e><e><k>type</k><v>" + type.name() + "</v></e><e><k>present</k><v></v></e></xjxobj>"));
+        nameValuePairs.add(new BasicNameValuePair("xajaxargs[]", "<xjxobj><e><k>event</k><v>type</v></e><e><k>location</k><v>ua,0,8</v></e><e><k>currency</k><v>USD</v></e><e><k>type</k><v>" + financeUABidType.name() + "</v></e><e><k>present</k><v></v></e></xjxobj>"));
         post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
         HttpResponse response = httpclient.execute(post);
@@ -54,11 +75,6 @@ public class Main {
         }
 
         return (amountUAHSum / amountUSDSum);
-    }
-
-    private enum Type {
-        //buy, sell
-        BID, ASK
     }
 
 }

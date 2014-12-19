@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<body >
+
+<canvas id="e" width="19" height="19"></canvas>
+<img id = "icon" src="dollar.gif" onload="drawIcon()">
+
+<script>
+
+    function drawIcon(){
+	  var canvas = document.getElementById("e");
+	  var context = canvas.getContext("2d");
+	  
+	  var img = document.getElementById("icon");
+	  
+	  context.drawImage(img, 0, 0);
+
+	  context.fillStyle  = "green";
+	  context.fillRect(0, 11, canvas.width, canvas.height);
+	  
+	  context.fillStyle = "white";  
+	  context.font = "bold 8px Arial";
+	  context.fillText("18.23", 0, 18);
+	  
+	  var imageData = context.getImageData(0, 0, 19, 19);
+	  //chrome.browserAction.setIcon({
+	//	imageData: imageData
+	 // });
+	}
+
+
+</script>
+
+</body>
+</html>
